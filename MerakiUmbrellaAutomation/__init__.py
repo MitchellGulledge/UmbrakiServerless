@@ -3,6 +3,7 @@ import meraki
 import re
 import ast
 import base64
+import logging
 from math import radians, cos, sin, asin, sqrt
 from ip2geotools.databases.noncommercial import DbIpCity
 
@@ -68,10 +69,9 @@ def strip_meraki_network_tags(meraki_network_tag):
     # below parses the for the specific network tag on the network that correlates with SIG-
     meraki_tag_strip_part1 = re.findall(r'[S]+[I]+[G]+[-].*', str(meraki_network_tag))
     meraki_tag_strip_part2 = re.findall(r'^([\S]+)', str(meraki_tag_strip_part1[0]))
-    print("look below")
     new_string = str(meraki_tag_strip_part2[0])
     new_string = new_string[0:-2]
-    print(new_string)
+    logging.info(new_string)
     return new_string
 
 # defining function that creates dictionary of IPsec config from Umbrella config
@@ -150,7 +150,7 @@ def get_dc_ip(networkId):
 
     # request to obtain list of DCs
     get_dc_req = requests.get(UmbrellaConfig.dc_url, headers=UmbrellaConfig.headers)
-    print(get_dc_req)
+    logging.info(get_dc_req)
     # if response is successful begin building variables to feed into haversine formula
     if get_dc_req.status_code == 200:
         for datacenters in get_dc_req.json()['continents']:
@@ -179,7 +179,7 @@ def delete_umbrella_tunnel(vpn_tunnel_name):
     # fetching list of umbrella tunnel config
     get_req = requests.get(UmbrellaConfig.tunnel_url, headers=UmbrellaConfig.headers)
     umbrella_tunnel_info = get_req.json()
-    print("info" + str(umbrella_tunnel_info))
+    logging.info("info" + str(umbrella_tunnel_info))
 
     for tunnel in umbrella_tunnel_info:
         # matching against tunnel name as conditional statement
@@ -193,7 +193,7 @@ def delete_umbrella_tunnel(vpn_tunnel_name):
             
             # deleting Umbrella tunnel
             delReq = requests.delete(del_tunnel_url, headers=UmbrellaConfig.headers)
-            print(delReq.reason)
+            logging.info(delReq.reason)
 
             if delReq.reason == 200:
                 # if tunnel deleted successfully, swapping tunnel already made variable back to false
@@ -209,15 +209,15 @@ def update_meraki_vpn(vpn_list):
 def validate_mx_firmware(branch_node):
     # call to get device info
     devices = MerakiConfig.sdk_auth.networks.getNetworkDevices(branch_node)
-    print(devices)
+    logging.info(devices)
     # validating firmware to ensure device is on 15
     firmwareversion = devices[0]['firmware'] 
     # validation to say True False if MX appliance is on 15 firmware
     firmwarecompliance = str(firmwareversion).startswith("wired-15") 
     if firmwarecompliance == True:
-        print("firmware is compliant")
+        logging.info("firmware is compliant")
     else:
-        print("firmware is not compliant breaking loop")
+        logging.info("firmware is not compliant breaking loop")
         firmwarecompliance = False
 
     return firmwarecompliance
@@ -244,7 +244,7 @@ def create_umbrella_tunnel(tunnel_name):
 # loop that iterates through the variable tagsnetwork and matches networks with SIG- in the tag
 for meraki_networks in MerakiConfig.res_tags_network:
     if "SIG-" in str(meraki_networks['tags']): 
-        print(meraki_networks)
+        logging.info(meraki_networks)
         # obtaining network ID in order to obtain device information
         network_info = meraki_networks['id'] 
         # network name used to label Meraki VPN and Umbrella ipsec config
@@ -261,8 +261,8 @@ for meraki_networks in MerakiConfig.res_tags_network:
 
         # executing function to obtain the vpn peer ip for the meraki branch device
         meraki_branch_peer_ip = get_dc_ip(network_info)
-        print("look here for primary vpn ip")
-        print(meraki_branch_peer_ip)
+        logging.info("look here for primary vpn ip")
+        logging.info(meraki_branch_peer_ip)
 
         # creating umbrella ipsec config to be the data in the post, netname variable is tunnel name
         umbrella_tunnel_name = {"name": netname, 'deviceType': 'Meraki MX'}
@@ -284,20 +284,20 @@ for meraki_networks in MerakiConfig.res_tags_network:
         for tunnel_name in umbrella_tunnel_dict:
             if netname == tunnel_name['name']:
                 tunnel_already_made = True
-                print("tunnel detected in Umbrella config")
+                logging.info("tunnel detected in Umbrella config")
             else:
-                print("tunnel not detected in Umbrella config")
+                logging.info("tunnel not detected in Umbrella config")
         
         # if tunnel is built in umbrella already but not Meraki we need to detect and update config
         if tunnel_already_made == True:
             # iterating through original list of vpn tunnels from Meraki to match on name
             for meraki_tunnel_name in MerakiConfig.meraki_vpn_list:
                 if netname == meraki_tunnel_name['name']:
-                    print("tunnel config in umbrella matches Meraki for " + netname)
+                    logging.info("tunnel config in umbrella matches Meraki for " + netname)
                     # changing variable for being detected in umbrella and meraki config
                     in_umb_and_meraki_config = True
                 else:
-                    print("tunnel not built in Meraki config for " + netname)
+                    logging.info("tunnel not built in Meraki config for " + netname)
 
         # if tunnel is built in umbrella already but not Meraki we need to detect and update config
         if in_umb_and_meraki_config == False:
@@ -310,7 +310,7 @@ for meraki_networks in MerakiConfig.res_tags_network:
 
             # deleting umbrella tunnel config and set tunnel_already_made variable to False
             delete_umb_tun = delete_umbrella_tunnel(netname)
-            print(delete_umb_tun)
+            logging.info(delete_umb_tun)
 
         if tunnel_already_made == False:
 
@@ -330,10 +330,10 @@ for meraki_networks in MerakiConfig.res_tags_network:
             for vpn_peer_name in MerakiConfig.meraki_vpn_list:
                 # iterating through list of existing meraki vpn peers validating if tunnel is created
                 if vpn_peer_name == str(MerakiConfig.meraki_vpn_list):
-                    print("peer detected in the config already updating PSK")
+                    logging.info("peer detected in the config already updating PSK")
                     is_meraki_tunnel_updated = True
                     # updating psk for meraki vpn tunnel to umbrella
-                    print("updating psk for existing tunnel in Meraki to match Umbrella")
+                    logging.info("updating psk for existing tunnel in Meraki to match Umbrella")
                     vpn_peer_name['secret'] = tunnelPSKSecret
 
             if is_meraki_tunnel_updated == False:
@@ -341,5 +341,5 @@ for meraki_networks in MerakiConfig.res_tags_network:
                 MerakiConfig.meraki_vpn_list.append(primary_vpn_tunnel_template)      
 
 # final function performing update to Meraki VPN config
-print(MerakiConfig.meraki_vpn_list)
+logging.info(MerakiConfig.meraki_vpn_list)
 update_meraki_vpn(MerakiConfig.meraki_vpn_list)
