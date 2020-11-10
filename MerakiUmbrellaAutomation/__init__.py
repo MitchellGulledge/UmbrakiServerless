@@ -355,6 +355,6 @@ def main(MerakiTimer: func.TimerRequest) -> None:
                     local_id =  umbrella_tunnel_information[0]
                     secret = umbrella_tunnel_information[1]     
 
-# final function performing update to Meraki VPN config
-logging.info(MerakiConfig.meraki_vpn_list)
-update_meraki_vpn(MerakiConfig.meraki_vpn_list)
+    # final function performing update to Meraki VPN config
+    logging.info(MerakiConfig.meraki_vpn_list)
+    update_meraki_vpn(MerakiConfig.meraki_vpn_list)
