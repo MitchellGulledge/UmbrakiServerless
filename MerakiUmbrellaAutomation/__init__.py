@@ -250,7 +250,7 @@ def create_umbrella_tunnel(tunnel_name):
 tunnel_already_made = False
 
 # creating a main function for Azure Function
-def main():
+def main(MerakiTimer: func.TimerRequest) -> None:
     # loop that iterates through the variable tagsnetwork and matches networks with SIG- in the tag
     for meraki_networks in MerakiConfig.res_tags_network:
         if "SIG-" in str(meraki_networks['tags']): 
