@@ -10,9 +10,9 @@ from math import radians, cos, sin, asin, sqrt
 
 # class that contains all Meraki necessary config
 class MerakiConfig:
-    meraki_api_key = ''
-    meraki_org_name = ''
-    tag_prefix = 'SIG-'
+    meraki_api_key = os.environ['meraki_api_key'].lower()
+    meraki_org_name = os.environ['meraki_org_name']
+    tag_prefix = os.environ['tag_prefix']
     org_id = None
     sdk_auth = meraki.DashboardAPI(meraki_api_key)
 
@@ -40,9 +40,9 @@ class MerakiConfig:
 # class that contains all Umbrella necessary config
 class UmbrellaConfig:
     # this is obtained from the api keys tab and specifically the umbrella management keys
-    umbrella_key = ''
-    umbrella_secret = ''
-    umbrella_org_id = ''
+    umbrella_key = os.environ['umbrella_key']
+    umbrella_secret = os.environ['umbrella_secret']
+    umbrella_org_id = os.environ['umbrella_org_id']
 
     # Command -  echo -n 'secret:key' | base64 in terminal
     base64_value = umbrella_key + ':' + umbrella_secret
