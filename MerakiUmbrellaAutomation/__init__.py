@@ -350,7 +350,7 @@ def main(MerakiTimer: func.TimerRequest) -> None:
                 if is_meraki_tunnel_updated == False:
                     print("meraki tunnel needs to be updated with local ID + PSK")
                     # appending newly created tunnel config to original VPN list
-                    merakivpns[0]['peers'].append(primary_vpn_tunnel_template)      
+                    MerakiConfig.meraki_vpn_list.append(primary_vpn_tunnel_template)      
                     print(type(primary_vpn_tunnel_template))   
                     local_id =  umbrella_tunnel_information[0]
                     secret = umbrella_tunnel_information[1]     
