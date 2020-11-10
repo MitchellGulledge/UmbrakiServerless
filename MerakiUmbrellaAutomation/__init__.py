@@ -5,7 +5,6 @@ import ast
 import base64
 import logging
 from math import radians, cos, sin, asin, sqrt
-from ip2geotools.databases.noncommercial import DbIpCity
 
 # Author: Mitchell Gulledge
 
@@ -138,10 +137,15 @@ def get_dc_ip(networkId):
             # setting public ip for branch to later calculate long/lat
             mx_branch_ip = device['publicIp']
             # calculating long/lat of mx branch ip address
-            geo_response = DbIpCity.get(mx_branch_ip, api_key='free')
-            lon1 = geo_response.longitude
-            lat1 = geo_response.latitude
+            geo_url = "https://ipinfo.io/" + mx_branch_ip 
+            geo_response2 = requests.get(geo_url).json()
+            print(geo_response2['loc'])
+            print(type(geo_response2['loc']))
+            x = geo_response2['loc']
+            long_lat_tuple = tuple(x.split(','))
 
+            lon1 = long_lat_tuple[0]
+            lat1 = long_lat_tuple[1]
     # variable for umbrella public IP
     primary_vpn_tunnel_ip = '' 
 
@@ -240,6 +244,9 @@ def create_umbrella_tunnel(tunnel_name):
     tunnelPSKSecret = client["authentication"]["parameters"]["secret"] 
     
     return tunnelPSKFqdn, tunnelPSKSecret
+
+# before executing loop setting the variable for tunnel already made being false
+tunnel_already_made = False
 
 # loop that iterates through the variable tagsnetwork and matches networks with SIG- in the tag
 for meraki_networks in MerakiConfig.res_tags_network:
