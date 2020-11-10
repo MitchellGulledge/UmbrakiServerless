@@ -117,7 +117,7 @@
     "variables": {
         "hostingPlanName": "[parameters('function_app_name')]",
         "storageAccountName": "[concat('storage', uniquestring(resourceGroup().id))]",
-        "functionPackage": "https://github.com/MitchellGulledge/UmbrakiServerless/blob/main/UmbrakiServerless.zip"
+        "functionPackage": "https://github.com/MitchellGulledge/UmbrakiServerless/raw/main/UmbrakiServerless.zip"
     },
     "resources": [
         {
