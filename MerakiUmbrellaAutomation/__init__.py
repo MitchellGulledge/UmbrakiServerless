@@ -5,6 +5,7 @@ import re
 import ast
 import base64
 import logging
+import azure.functions as func
 from math import radians, cos, sin, asin, sqrt
 
 # Author: Mitchell Gulledge
