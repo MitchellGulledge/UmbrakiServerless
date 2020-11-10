@@ -348,9 +348,13 @@ def main(MerakiTimer: func.TimerRequest) -> None:
                         vpn_peer_name['secret'] = tunnelPSKSecret
 
                 if is_meraki_tunnel_updated == False:
+                    print("meraki tunnel needs to be updated with local ID + PSK")
                     # appending newly created tunnel config to original VPN list
-                    MerakiConfig.meraki_vpn_list.append(primary_vpn_tunnel_template)      
+                    merakivpns[0]['peers'].append(primary_vpn_tunnel_template)      
+                    print(type(primary_vpn_tunnel_template))   
+                    local_id =  umbrella_tunnel_information[0]
+                    secret = umbrella_tunnel_information[1]     
 
-    # final function performing update to Meraki VPN config
-    logging.info(MerakiConfig.meraki_vpn_list)
-    update_meraki_vpn(MerakiConfig.meraki_vpn_list)
+# final function performing update to Meraki VPN config
+logging.info(MerakiConfig.meraki_vpn_list)
+update_meraki_vpn(MerakiConfig.meraki_vpn_list)
