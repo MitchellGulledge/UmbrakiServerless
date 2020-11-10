@@ -10,16 +10,16 @@ from math import radians, cos, sin, asin, sqrt
 
 # class that contains all Meraki necessary config
 class MerakiConfig:
-    api_key = ''
-    org_name = ''
+    meraki_api_key = ''
+    meraki_org_name = ''
     tag_prefix = 'SIG-'
     org_id = None
-    sdk_auth = meraki.DashboardAPI(api_key)
+    sdk_auth = meraki.DashboardAPI(meraki_api_key)
 
     # writing function to obtain org ID via linking ORG name
     result_org_id = sdk_auth.organizations.getOrganizations()
     for x in result_org_id:
-        if x['name'] == org_name:
+        if x['name'] == meraki_org_name:
             org_id = x['id']
 
     # creating original list of Meraki VPNs to later append to
@@ -40,25 +40,25 @@ class MerakiConfig:
 # class that contains all Umbrella necessary config
 class UmbrellaConfig:
     # this is obtained from the api keys tab and specifically the umbrella management keys
-    key = ''
-    secret = ''
-    org_id = ''
+    umbrella_key = ''
+    umbrella_secret = ''
+    umbrella_org_id = ''
 
     # Command -  echo -n 'secret:key' | base64 in terminal
-    base64_value = key + ':' + secret
+    base64_value = umbrella_key + ':' + umbrella_secret
     message_bytes = base64_value.encode('ascii')
     base64_bytes = base64.b64encode(message_bytes)
     base64_message = base64_bytes.decode('ascii')
 
     # url for network tunnels in umbrella dashboard
-    tunnel_url = "https://management.api.umbrella.com/v1/organizations/"+org_id+"/tunnels"
+    tunnel_url = "https://management.api.umbrella.com/v1/organizations/"+umbrella_org_id+"/tunnels"
 
     # url for listing umbrella DCs
     dc_url = 'https://management.api.umbrella.com/v1/service/tunnel/datacenters'
 
     # delete umbrella tunnel url 
     delUrl = 'https://management.api.umbrella.com/v1/organizations/'+ \
-        org_id+'/tunnels/'
+        umbrella_org_id+'/tunnels/'
 
     # creating header to authenticate API requests to Umbrella
     headers = {'Authorization': 'Basic ' + base64_message}
