@@ -267,6 +267,7 @@ def main(MerakiTimer: func.TimerRequest) -> None:
 
     # loop that iterates through the variable tagsnetwork and matches networks with SIG- in the tag
     for meraki_networks in MerakiConfig.res_tags_network:
+        logging.info(f"Current list of Meraki networks with a tag : {MerakiConfig.res_tags_network}")
         if "SIG-" in str(meraki_networks['tags']): 
             logging.info("tag detected in Meraki network")
             
