@@ -287,9 +287,11 @@ def main(MerakiTimer: func.TimerRequest) -> None:
             # creating umbrella ipsec config to be the data in the post, netname variable is tunnel name
             umbrella_tunnel_name = {"name": netname, 'deviceType': 'Meraki MX'}
             umbrella_tunnel_data = json.dumps(umbrella_tunnel_name)
+            logging.info(f"Umbrella tunnel config with branch info : {umbrella_tunnel_data}")
 
             # fetching list of umbrella tunnel config
             get_req = requests.get(UmbrellaConfig.tunnel_url, headers=UmbrellaConfig.headers)
+            logging.info(f"List of current Network tunnels in Umbrella : {get_req}")
 
             # converting get_req (list of umbrella vpn tunnels) from json response to dictionary
             umbrella_tunnel_dict = get_req.json()
@@ -308,6 +310,9 @@ def main(MerakiTimer: func.TimerRequest) -> None:
                 else:
                     logging.info("tunnel not detected in Umbrella config")
 
+           # logging state of whether tunnel is detected or now
+           logging.info(f"Tunnel is created : {tunnel_already_made}")
+                    
             # if tunnel is built in umbrella already but not Meraki we need to detect and update config
             if tunnel_already_made == True:
                 # iterating through original list of vpn tunnels from Meraki to match on name
@@ -318,6 +323,9 @@ def main(MerakiTimer: func.TimerRequest) -> None:
                         in_umb_and_meraki_config = True
                     else:
                         logging.info("tunnel not built in Meraki config for " + netname)
+ 
+           # logging state of whether tunnel is detected or now
+           logging.info(f"Tunnel is preconfigured in Meraki and Umbrella : {in_umb_and_meraki_config}")
 
             # if tunnel is built in umbrella already but not Meraki we need to detect and update config
             if in_umb_and_meraki_config == False:
@@ -359,11 +367,12 @@ def main(MerakiTimer: func.TimerRequest) -> None:
                 if is_meraki_tunnel_updated == False:
                     print("meraki tunnel needs to be updated with local ID + PSK")
                     # appending newly created tunnel config to original VPN list
-                    MerakiConfig.meraki_vpn_list.append(primary_vpn_tunnel_template)      
-                    print(type(primary_vpn_tunnel_template))   
+                    MerakiConfig.meraki_vpn_list.append(primary_vpn_tunnel_template)                    
                     local_id =  umbrella_tunnel_information[0]
-                    secret = umbrella_tunnel_information[1]     
+                    secret = umbrella_tunnel_information[1]
+                    # logging new vpn dictionary to append to rest of VPN peers
+                    logging.info("New Meraki VPN config " + primary_vpn_tunnel_template)
 
     # final function performing update to Meraki VPN config
-    logging.info(MerakiConfig.meraki_vpn_list)
+    logging.info("New Meraki VPN List " + MerakiConfig.meraki_vpn_list)
     update_meraki_vpn(MerakiConfig.meraki_vpn_list)
