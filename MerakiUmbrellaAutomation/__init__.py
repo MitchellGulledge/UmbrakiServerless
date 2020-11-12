@@ -72,7 +72,7 @@ def strip_meraki_network_tags(meraki_network_tag):
     meraki_tag_strip_part2 = re.findall(r'^([\S]+)', str(meraki_tag_strip_part1[0]))
     new_string = str(meraki_tag_strip_part2[0])
     new_string = new_string[0:-2]
-    logging.info(new_string)
+    logging.info(f"Parsed tag for matched network is : {new_string}")
     return new_string
 
 # defining function that creates dictionary of IPsec config from Umbrella config
@@ -156,7 +156,7 @@ def get_dc_ip(networkId):
 
     # request to obtain list of DCs
     get_dc_req = requests.get(UmbrellaConfig.dc_url, headers=UmbrellaConfig.headers)
-    logging.info(get_dc_req)
+    logging.info(f"List of current Umbrella DCs : {get_dc_req}")
     # if response is successful begin building variables to feed into haversine formula
     if get_dc_req.status_code == 200:
         for datacenters in get_dc_req.json()['continents']:
@@ -175,17 +175,25 @@ def get_dc_ip(networkId):
                 # when iterating through list if haversince_result is less than distance_to_dc
                 # rewrite the distance_to_dc variable to the haversince_result
                 if haversince_result < distance_to_dc:
+                    logging.info(f"Longitude for branch : {lon1}")
+                    logging.info(f"Latitude for branch : {lat1}")
+                    logging.info(f"Longitude for DC : {lon2}")
+                    logging.info(f"Latitude for DC : {lat2}")
                     distance_to_dc = haversince_result
                     primary_vpn_tunnel_ip = umb_datacenter['range']
                     primary_vpn_tunnel_ip = str(primary_vpn_tunnel_ip)[0:-3]
+                    logging.info(f"Distance from Branch to DC : {haversince_result}")
 
         return primary_vpn_tunnel_ip
 
 def delete_umbrella_tunnel(vpn_tunnel_name):
+    
     # fetching list of umbrella tunnel config
     get_req = requests.get(UmbrellaConfig.tunnel_url, headers=UmbrellaConfig.headers)
     umbrella_tunnel_info = get_req.json()
-    logging.info("info" + str(umbrella_tunnel_info))
+    
+    # logging list of network tunnels before deleting
+    logging.info(f"current list of umbrella tunnels before deleting : {umbrella_tunnel_info}")
 
     for tunnel in umbrella_tunnel_info:
         # matching against tunnel name as conditional statement
@@ -199,11 +207,14 @@ def delete_umbrella_tunnel(vpn_tunnel_name):
             
             # deleting Umbrella tunnel
             delReq = requests.delete(del_tunnel_url, headers=UmbrellaConfig.headers)
-            logging.info(delReq.reason)
 
             if delReq.reason == 200:
+                # logging the successful deletion of the umbrella tunnel
+                logging.info(f"successfully deleted network tunnel  : {umb_tunnel_id}")
+                
                 # if tunnel deleted successfully, swapping tunnel already made variable back to false
                 tunnel_already_made = False
+                logging.info(f"tunnel_already_made variable current value : {umb_tunnel_id}")
 
 # function to update Meraki VPN config
 def update_meraki_vpn(vpn_list):
@@ -215,9 +226,9 @@ def update_meraki_vpn(vpn_list):
 def validate_mx_firmware(branch_node):
     # call to get device info
     devices = MerakiConfig.sdk_auth.networks.getNetworkDevices(branch_node)
-    logging.info(devices)
     # validating firmware to ensure device is on 15
     firmwareversion = devices[0]['firmware'] 
+    logging.info(f"MX firmware version : {firmwareversion}")
     # validation to say True False if MX appliance is on 15 firmware
     firmwarecompliance = str(firmwareversion).startswith("wired-15") 
     if firmwarecompliance == True:
@@ -237,6 +248,7 @@ def create_umbrella_tunnel(tunnel_name):
     # parsing tunnel info for tunnel psk and id
     # Access tunnel ID
     tunnelId = umbrella_tunnel_info["id"]
+    logging.info(f"new umbrella tunnel ID : {tunnelId}")
     # Access PSK id:key
     client = umbrella_tunnel_info["client"]
 
@@ -277,9 +289,6 @@ def main(MerakiTimer: func.TimerRequest) -> None:
                 # if the firmware validation returns as false the script will break from the loop
                 break 
 
-            # firmware validation passed, logging below
-            logging.info(f"Firmware validation failed for network : {netname}")
-
             # executing function to obtain the vpn peer ip for the meraki branch device
             meraki_branch_peer_ip = get_dc_ip(network_info)
             logging.info(f"Meraki VPN config public IP is : {meraki_branch_peer_ip}")
@@ -311,7 +320,7 @@ def main(MerakiTimer: func.TimerRequest) -> None:
                     logging.info("tunnel not detected in Umbrella config")
 
             # logging state of whether tunnel is detected or now
-            logging.info(f"Tunnel is created : {tunnel_already_made}")
+            logging.info(f"tunnel is created : {tunnel_already_made}")
                     
             # if tunnel is built in umbrella already but not Meraki we need to detect and update config
             if tunnel_already_made == True:
@@ -322,10 +331,10 @@ def main(MerakiTimer: func.TimerRequest) -> None:
                         # changing variable for being detected in umbrella and meraki config
                         in_umb_and_meraki_config = True
                     else:
-                        logging.info("tunnel not built in Meraki config for " + netname)
+                        logging.info(f"tunnel not built in Meraki config for : {netname}")
  
             # logging state of whether tunnel is detected or now
-            logging.info(f"Tunnel is preconfigured in Meraki and Umbrella : {in_umb_and_meraki_config}")
+            logging.info(f"tunnel is preconfigured in Meraki and Umbrella : {in_umb_and_meraki_config}")
 
             # if tunnel is built in umbrella already but not Meraki we need to detect and update config
             if in_umb_and_meraki_config == False:
@@ -374,5 +383,5 @@ def main(MerakiTimer: func.TimerRequest) -> None:
                     logging.info(f"New MX VPN site config : {primary_vpn_tunnel_template}")
 
     # final function performing update to Meraki VPN config
-    logging.info("New Meraki VPN List " + MerakiConfig.meraki_vpn_list)
+    logging.info(f"New Meraki Org VPN config : {MerakiConfig.meraki_vpn_list}")
     update_meraki_vpn(MerakiConfig.meraki_vpn_list)
