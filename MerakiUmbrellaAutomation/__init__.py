@@ -324,8 +324,8 @@ def main(MerakiTimer: func.TimerRequest) -> None:
                     else:
                         logging.info("tunnel not built in Meraki config for " + netname)
  
-           # logging state of whether tunnel is detected or now
-           logging.info(f"Tunnel is preconfigured in Meraki and Umbrella : {in_umb_and_meraki_config}")
+            # logging state of whether tunnel is detected or now
+            logging.info(f"Tunnel is preconfigured in Meraki and Umbrella : {in_umb_and_meraki_config}")
 
             # if tunnel is built in umbrella already but not Meraki we need to detect and update config
             if in_umb_and_meraki_config == False:
