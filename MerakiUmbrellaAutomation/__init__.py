@@ -256,11 +256,16 @@ def main(MerakiTimer: func.TimerRequest) -> None:
     # loop that iterates through the variable tagsnetwork and matches networks with SIG- in the tag
     for meraki_networks in MerakiConfig.res_tags_network:
         if "SIG-" in str(meraki_networks['tags']): 
-            logging.info(meraki_networks)
+            logging.info("tag detected in Meraki network")
+            
             # obtaining network ID in order to obtain device information
             network_info = meraki_networks['id'] 
+            logging.info(f"Network ID for MX is : {network_info}")
+            
             # network name used to label Meraki VPN and Umbrella ipsec config
             netname = meraki_networks['name'] 
+            logging.info(f"Network name is : {netname}")
+            
             # obtaining all tags for network as this will be placed in VPN config
             nettag = meraki_networks['tags']  
 
@@ -268,13 +273,16 @@ def main(MerakiTimer: func.TimerRequest) -> None:
             firmware_validate = validate_mx_firmware(network_info)
 
             if firmware_validate == False:
+                logging.info(f"Firmware validation failed for network : {netname}")
                 # if the firmware validation returns as false the script will break from the loop
                 break 
 
+            # firmware validation passed, logging below
+            logging.info(f"Firmware validation failed for network : {netname}")
+
             # executing function to obtain the vpn peer ip for the meraki branch device
             meraki_branch_peer_ip = get_dc_ip(network_info)
-            logging.info("look here for primary vpn ip")
-            logging.info(meraki_branch_peer_ip)
+            logging.info(f"Meraki VPN config public IP is : {meraki_branch_peer_ip}")
 
             # creating umbrella ipsec config to be the data in the post, netname variable is tunnel name
             umbrella_tunnel_name = {"name": netname, 'deviceType': 'Meraki MX'}
