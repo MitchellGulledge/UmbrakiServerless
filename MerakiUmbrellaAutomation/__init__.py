@@ -141,8 +141,9 @@ def get_dc_ip(networkId):
             # calculating long/lat of mx branch ip address
             geo_url = "https://ipinfo.io/" + mx_branch_ip 
             geo_response2 = requests.get(geo_url).json()
-            print(geo_response2['loc'])
-            print(type(geo_response2['loc']))
+            
+            logging.info(f"Longitude/Lat for Branch is : {geo_response2['loc']}")
+
             x = geo_response2['loc']
             long_lat_tuple = tuple(x.split(','))
 
@@ -156,7 +157,7 @@ def get_dc_ip(networkId):
 
     # request to obtain list of DCs
     get_dc_req = requests.get(UmbrellaConfig.dc_url, headers=UmbrellaConfig.headers)
-    logging.info(f"List of current Umbrella DCs : {get_dc_req}")
+    logging.info(f"List of current Umbrella DCs : {get_dc_req.content}")
     # if response is successful begin building variables to feed into haversine formula
     if get_dc_req.status_code == 200:
         for datacenters in get_dc_req.json()['continents']:
@@ -314,7 +315,7 @@ def main(MerakiTimer: func.TimerRequest) -> None:
 
             # now we can iterate through the loop and see if netname is contained within the get_req variable
             for tunnel_name in umbrella_tunnel_dict:
-                if netname == tunnel_name['name']:
+                if netname == str(tunnel_name['name']):
                     tunnel_already_made = True
                     logging.info("tunnel detected in Umbrella config")
                 else:
