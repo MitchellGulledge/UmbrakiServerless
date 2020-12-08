@@ -7,6 +7,7 @@ import base64
 import logging
 import azure.functions as func
 from math import radians, cos, sin, asin, sqrt
+import pycountry_convert as pc
 
 # Author: Mitchell Gulledge
 
