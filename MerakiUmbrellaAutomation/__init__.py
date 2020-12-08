@@ -118,7 +118,7 @@ def haversine(lon1, lat1, lon2, lat2):
     return c * r
 
 # this function is intended to replace define_vpn_peer_ip function
-def get_dc_ip(network_id, meraki_config, umbrella_config):
+def get_dc_ip(network_id):
     # variables for the longitude/latitude for both sites
     lon1 = ''
     lat1 = ''
@@ -131,8 +131,8 @@ def get_dc_ip(network_id, meraki_config, umbrella_config):
 
     # obtaining branch MXs public IP w/ org wide network devices call
     logging.info("Obtaining list of Meraki device statuses")
-    list_of_device_statuses = meraki_config.sdk_auth.organizations.getOrganizationDevicesStatuses(
-        meraki_config.org_id)
+    list_of_device_statuses = MerakiConfig.sdk_auth.organizations.getOrganizationDevicesStatuses(
+        MerakiConfig.org_id)
 
     if str(network_id) in str(list_of_device_statuses):
         logging.info("Successfully obtained list of Device statuses")
@@ -187,7 +187,7 @@ def get_dc_ip(network_id, meraki_config, umbrella_config):
     distance_to_dc = 999999
 
     # request to obtain list of DCs
-    get_dc_req = requests.get(umbrella_config.dc_url, headers=umbrella_config.headers)
+    get_dc_req = requests.get(UmbrellaConfig.dc_url, headers=UmbrellaConfig.headers)
     logging.info("Obtaining a list of all Umbrella Datacenters: " + str(get_dc_req.content))
 
     # creating list to hold all regional DCs 
