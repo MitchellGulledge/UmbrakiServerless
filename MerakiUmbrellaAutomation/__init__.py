@@ -39,6 +39,9 @@ class MerakiConfig:
 
     # filtering None types from the list using filter
     res_tags_network = list(filter(None, tags_network)) 
+    
+    # creating variable that indicates whether the Meraki VPN list has been updated
+    meraki_vpn_config_needs_update = False
 
 # class that contains all Umbrella necessary config
 class UmbrellaConfig:
@@ -444,14 +447,20 @@ def main(MerakiTimer: func.TimerRequest) -> None:
                 if is_meraki_tunnel_updated == False:
                     logging.info(f"updating tunnel with new Umbrella PSK + Local ID")
                     # appending newly created tunnel config to original VPN list
-                    MerakiConfig.meraki_vpn_list.append(primary_vpn_tunnel_template)                    
+                    MerakiConfig.meraki_vpn_list.append(primary_vpn_tunnel_template)   
+                         
+                    # indicating that we need to update the Meraki vpn config
+                    MerakiConfig.meraki_vpn_config_needs_update = True
+                         
                     local_id =  umbrella_tunnel_information[0]
                     secret = umbrella_tunnel_information[1]
                     # logging new vpn dictionary to append to rest of VPN peers
                     logging.info(f"New MX VPN site config : {primary_vpn_tunnel_template}")
 
-    # final function performing update to Meraki VPN config
+    if MerakiConfig.meraki_vpn_config_needs_update == True:
                          
-    logging.info(f"New Meraki Org VPN config : {MerakiConfig.meraki_vpn_list}")
+        # final function performing update to Meraki VPN config
+
+        logging.info(f"New Meraki Org VPN config : {MerakiConfig.meraki_vpn_list}")
                          
-    update_meraki_vpn(MerakiConfig.meraki_vpn_list)
+        update_meraki_vpn(MerakiConfig.meraki_vpn_list)
