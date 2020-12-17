@@ -3,3 +3,5 @@ meraki==1.3.0
 ipwhois==1.1.0
 IPy==1.00
 requests==2.24.0
+pycountry==20.7.3
+pycountry-convert==0.7.2
