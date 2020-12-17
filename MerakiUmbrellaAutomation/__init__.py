@@ -223,7 +223,8 @@ def get_dc_ip(network_id):
                 # executing Haversine Formula
                 haversince_result = haversine(float(lon1), float(lat1),
                                               float(lon2), float(lat2))
-                print("Haversine result for branch to potential Umbrella DC: " + str(haversince_result))
+                         
+                logging.info("Haversine result for branch to potential Umbrella DC: " + str(haversince_result))
 
                 # setting haversine result to the absolute value
                 haversince_result = abs(haversince_result)
@@ -286,9 +287,13 @@ def validate_mx_firmware(branch_node):
     # validation to say True False if MX appliance is on 15 firmware
     firmwarecompliance = str(firmwareversion).startswith("wired-15") 
     if firmwarecompliance == True:
+                         
         logging.info("firmware is compliant")
+                         
     else:
+                         
         logging.info("firmware is not compliant breaking loop")
+                         
         firmwarecompliance = False
 
     return firmwarecompliance
@@ -308,6 +313,7 @@ def create_umbrella_tunnel(tunnel_name):
 
     # parsing the local id/fqdn for the meraki vpn config here
     tunnelPSKFqdn = client["authentication"]["parameters"]["id"] 
+                         
     # parsing the pre shared key for the meraki vpn config here
     tunnelPSKSecret = client["authentication"]["parameters"]["secret"] 
     
@@ -340,6 +346,7 @@ def main(MerakiTimer: func.TimerRequest) -> None:
             firmware_validate = validate_mx_firmware(network_info)
 
             if firmware_validate == False:
+                         
                 logging.info(f"Firmware validation failed for network : {netname}")
                 # if the firmware validation returns as false the script will break from the loop
                 break 
@@ -370,8 +377,11 @@ def main(MerakiTimer: func.TimerRequest) -> None:
             for tunnel_name in umbrella_tunnel_dict:
                 if netname == str(tunnel_name['name']):
                     tunnel_already_made = True
+                         
                     logging.info("tunnel detected in Umbrella config")
+                         
                 else:
+                         
                     logging.info("tunnel not detected in Umbrella config")
 
             # logging state of whether tunnel is detected or now
@@ -385,7 +395,9 @@ def main(MerakiTimer: func.TimerRequest) -> None:
                         logging.info("tunnel config in umbrella matches Meraki for " + netname)
                         # changing variable for being detected in umbrella and meraki config
                         in_umb_and_meraki_config = True
+                         
                     else:
+                         
                         logging.info(f"tunnel not built in Meraki config for : {netname}")
  
             # logging state of whether tunnel is detected or now
@@ -402,6 +414,7 @@ def main(MerakiTimer: func.TimerRequest) -> None:
 
                 # deleting umbrella tunnel config and set tunnel_already_made variable to False
                 delete_umb_tun = delete_umbrella_tunnel(netname)
+                         
                 logging.info(delete_umb_tun)
 
             if tunnel_already_made == False:
@@ -438,5 +451,7 @@ def main(MerakiTimer: func.TimerRequest) -> None:
                     logging.info(f"New MX VPN site config : {primary_vpn_tunnel_template}")
 
     # final function performing update to Meraki VPN config
+                         
     logging.info(f"New Meraki Org VPN config : {MerakiConfig.meraki_vpn_list}")
+                         
     update_meraki_vpn(MerakiConfig.meraki_vpn_list)
